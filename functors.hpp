@@ -9,8 +9,8 @@
 //
 //This file contains set of simple useful functors or functor adapters. 
 
-#ifndef FUNCTORS_HPP
-#define FUNCTORS_HPP 
+#ifndef BOOST_FUNCTORS_HPP
+#define BOOST_FUNCTORS_HPP 
 #include <cassert>
 #include <utility>
 
@@ -153,7 +153,7 @@ template <typename Functor,typename Compare = Less>
         return FunctorToComparator<Functor,Compare>(std::move(functor), std::move(compare));
     };
 
-//The output Iterator takes functor and
+//The output iterator takes functor and
 //each time the operator= is called the given function is called
 template <typename Functor>
     struct FunctorToOutputIterator {
@@ -163,6 +163,15 @@ template <typename Functor>
         typedef void * pointer;
         typedef void   reference;
 
+        FunctorToOutputIterator() = default;
+
+        FunctorToOutputIterator(FunctorToOutputIterator &&) = default;
+
+        FunctorToOutputIterator(const FunctorToOutputIterator &) = default;
+
+        FunctorToOutputIterator& operator=(FunctorToOutputIterator &&) = default;
+
+        FunctorToOutputIterator& operator=(const FunctorToOutputIterator &) = default;
 
         FunctorToOutputIterator(Functor functor= Functor()) :
             m_functor(functor) {}
@@ -175,6 +184,11 @@ template <typename Functor>
         FunctorToOutputIterator & operator++() {
             return *this;
         }
+        
+        FunctorToOutputIterator & operator++(int) {
+            return *this;
+        }
+
 
         FunctorToOutputIterator & operator*() {
             return *this;
@@ -333,4 +347,4 @@ template <typename FunctorLeft, typename FunctorRight>
     }
 
 } //boost
-#endif /* FUNCTORS_HPP */
+#endif /* BOOST_FUNCTORS_HPP */
