@@ -1,0 +1,74 @@
+functors
+========
+
+This small library contains set of small but useful functors and functors adapters. See functors_example.cpp for examples.
+Minimal gcc : 7.2
+minimal clang : 3.2
+
+Caution extensive use of c++11!
+
+List of utilities:
+
+SkipFunctor 
+    takes any number of arguments; does completely nothing
+
+ReturnSomethingFunctor<T,t> 
+    takes any number of arguments; returns t;
+
+IdentityFunctor 
+    takes one parameter and returns it.
+
+ReturnFalseFunctor
+    takes any number of arguments; returns false;
+    
+ReturnTrueFunctor  
+    takes any number of arguments; returns true;
+
+ReturnZeroFunctor 
+    takes any number of arguments; returns 0;
+
+AssertFunctor 
+    takes any number of arguments; assets;
+
+ArrayToFunctor<Array>
+    Stores object with operator[]. 
+    Provides operator().
+
+Set of non-template comparison functor (only operator() is templated):
+  * Greater 
+  * Less 
+  * GreaterEqual 
+  * LessEqual 
+  * EqualTo 
+  * NotEqualTo 
+   
+
+FunctorToComparator<Functor, Compare>
+    This comparator  takes functor "f" and comparator "c".
+    For elements (x,y) returns c(f(x), f(y))
+    c is Less by default
+
+
+FunctorToOutputIterator<Functor>
+    The output iterator takes functor and
+    each time the operator= is called the given function is called
+
+Logical operators as functors:
+    *Not 
+    *Or 
+    *And 
+    *Xor 
+
+LiftBinaryOperatorFunctor<Operator, FunctorLeft, FunctorRight>
+    Functor stores binary operator "o" and two functors "f" and "g".
+    For given "args" returns o(f(args), g(args)).
+
+Boolean functors adapters. All of them stores boolean functors 
+and perform appropriate logical operation in the operator().
+
+    *NotFunctor<Functor>
+    *OrFunctor<FunctorLeft, FunctorRight> 
+    *AndFunctor<FunctorLeft, FunctorRight> 
+    *XorFunctor<FunctorLeft, FunctorRight> 
+
+
