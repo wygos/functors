@@ -5,7 +5,7 @@ This small library contains set of small but useful functors and functors adapte
 Minimal gcc : 7.2
 minimal clang : 3.2
 
-Caution extensive use of c++11!
+Caution! Extensive use of c++11!
 
 List of utilities:
 
@@ -54,10 +54,10 @@ FunctorToOutputIterator<Functor>
     each time the operator= is called the given function is called
 
 Logical operators as functors:
-    *Not 
-    *Or 
-    *And 
-    *Xor 
+    * Not 
+    * Or 
+    * And 
+    * Xor 
 
 LiftBinaryOperatorFunctor<Operator, FunctorLeft, FunctorRight>
     Functor stores binary operator "o" and two functors "f" and "g".
@@ -66,9 +66,9 @@ LiftBinaryOperatorFunctor<Operator, FunctorLeft, FunctorRight>
 Boolean functors adapters. All of them stores boolean functors 
 and perform appropriate logical operation in the operator().
 
-    *NotFunctor<Functor>
-    *OrFunctor<FunctorLeft, FunctorRight> 
-    *AndFunctor<FunctorLeft, FunctorRight> 
-    *XorFunctor<FunctorLeft, FunctorRight> 
+    * NotFunctor<Functor>
+    * OrFunctor<FunctorLeft, FunctorRight> 
+    * AndFunctor<FunctorLeft, FunctorRight> 
+    * XorFunctor<FunctorLeft, FunctorRight> 
 
 
