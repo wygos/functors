@@ -179,6 +179,7 @@ template <typename Functor>
         template <typename Arg> 
             FunctorToOutputIterator & operator=(Arg&& arg) {
                 m_functor(std::forward<Arg>(arg));
+                return *this;
             }
 
         FunctorToOutputIterator & operator++() {
