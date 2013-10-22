@@ -1,11 +1,11 @@
 functors
 ========
 
-This small library contains set of small but useful functors and functors adapters. See functors_example.cpp for examples.
+This library contains a set of small but useful functors and functors adapters. See functors_example.cpp for examples.
 Minimal gcc : 7.2
 minimal clang : 3.2
 
-Caution! Extensive use of c++11!
+Caution! Extensive usage of c++11 features!
 
 List of utilities:
 
@@ -28,13 +28,13 @@ ReturnZeroFunctor
     takes any number of arguments; returns 0;
 
 AssertFunctor 
-    takes any number of arguments; assets;
+    takes any number of arguments; asserts;
 
 ArrayToFunctor<Array>
-    Stores object with operator[]. 
-    Provides operator().
+    Stores an object which provides operator[]. 
+    Provides operator()().
 
-Set of non-template comparison functor (only operator() is templated):
+A set of non-template comparison functors (only operator() is templated):
   * Greater 
   * Less 
   * GreaterEqual 
@@ -44,14 +44,14 @@ Set of non-template comparison functor (only operator() is templated):
    
 
 FunctorToComparator<Functor, Compare>
-    This comparator  takes functor "f" and comparator "c".
-    For elements (x,y) returns c(f(x), f(y))
+    This comparator  takes a functor "f" and a comparator "c".
+    For elements (x,y) it returns c(f(x), f(y))
     c is Less by default
 
 
 FunctorToOutputIterator<Functor>
-    The output iterator takes functor and
-    each time the operator= is called the given function is called
+    The output iterator stores a functor and
+    each time the operator= is called the given functor is called
 
 Logical operators as functors:
     * Not 
@@ -60,15 +60,15 @@ Logical operators as functors:
     * Xor 
 
 LiftBinaryOperatorFunctor<Operator, FunctorLeft, FunctorRight>
-    Functor stores binary operator "o" and two functors "f" and "g".
-    For given "args" returns o(f(args), g(args)).
+    Functor stores a binary operator "o" and two functors "f" and "g".
+    For given arguments args returns o(f(args), g(args)).
 
-Boolean functors adapters. All of them stores boolean functors 
-and perform appropriate logical operation in the operator().
+Boolean functor adapters. Each of them stores a boolean functor 
+and performs an appropriate logical operation in the operator().
 
     * NotFunctor<Functor>
     * OrFunctor<FunctorLeft, FunctorRight> 
-    * AndFunctor<FunctorLeft, FunctorRight> 
+    * AndFunctor<FunctorLeft, FunctorRight>
     * XorFunctor<FunctorLeft, FunctorRight> 
 
 
