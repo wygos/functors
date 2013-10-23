@@ -53,11 +53,10 @@ FunctorToOutputIterator<Functor>
     The output iterator stores a functor and
     each time the operator= is called the given functor is called
 
-Logical operators as functors:
+A set of non-template logical operators functors (only operator() is templated):
     * Not 
     * Or 
     * And 
-    * Xor 
 
 LiftBinaryOperatorFunctor<Operator, FunctorLeft, FunctorRight>
     Functor stores a binary operator "o" and two functors "f" and "g".
