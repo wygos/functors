@@ -48,11 +48,6 @@ FunctorToComparator<Functor, Compare>
     For elements (x,y) it returns c(f(x), f(y))
     c is Less by default
 
-
-FunctorToOutputIterator<Functor>
-    The output iterator stores a functor and
-    each time the operator= is called the given functor is called
-
 A set of non-template logical operators functors (only operator() is templated):
     * Not 
     * Or 
