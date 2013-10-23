@@ -2,7 +2,7 @@ functors
 ========
 
 This library contains a set of small but useful functors and functors adapters. See functors_example.cpp for examples.
-Minimal gcc : 7.2
+Minimal gcc : 4.7.2
 minimal clang : 3.2
 
 Caution! Extensive usage of c++11 features!
