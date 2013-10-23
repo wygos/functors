@@ -13,7 +13,6 @@
 #define BOOST_FUNCTORS_HPP 
 #include <cassert>
 #include <utility>
-#include <functional>
 
 namespace boost {
 
@@ -89,42 +88,48 @@ template <typename Array>
 
 struct Greater {
     template<class T>
-        bool operator() (const T& x, const T& y) const {
+        auto operator() (const T& x, const T& y) const ->
+            decltype(x > y) {
             return x > y;
         };
 };
 
 struct Less {
     template<class T>
-        bool operator() (const T& x, const T& y) const {
+        auto operator() (const T& x, const T& y) const ->
+            decltype(x < y){
             return x < y;
         };
 };
 
 struct GreaterEqual {
     template<class T>
-        bool operator() (const T& x, const T& y) const {
+        auto operator() (const T& x, const T& y) const ->
+            decltype(x >= y){
             return x >= y;
         };
 };
 
 struct LessEqual {
     template<class T>
-        bool operator() (const T& x, const T& y) const {
+        auto operator() (const T& x, const T& y) const ->
+            decltype(x <= y){
             return x <= y;
         };
 };
 
 struct EqualTo {
     template<class T>
-        bool operator() (const T& x, const T& y) const {
+        auto operator() (const T& x, const T& y) const ->
+            decltype(x == y){
             return x == y;
         };
 };
 
 struct NotEqualTo {
     template<class T>
-        bool operator() (const T& x, const T& y) const {
+        auto operator() (const T& x, const T& y) const -> 
+            decltype(x != y){
             return x != y;
         };
 };
@@ -138,7 +143,11 @@ template <typename Functor,typename Compare=Less>
         FunctorToComparator(Functor f,Compare c=Compare()) : m_f(f),m_c(c){}
 
         template <typename T>
-            bool operator()(const T & left, const T & right) const {
+            auto operator()(const T & left, const T & right) const ->
+                decltype(std::declval<Compare>()(
+                            std::declval<Functor>()(left),
+                            std::declval<Functor>()(right)
+                            )){
                 return m_c(m_f(left), m_f(right));
             }
 
@@ -207,6 +216,34 @@ template <typename Functor>
         return FunctorToOutputIterator<Functor>(std::move(functor));
     }
 
+
+//****************************** This is set of functors representing standard boolean operation
+//that is !, &&, ||. These are equivalent to standard std:: structs but are not templated 
+//(only operator() is templated)
+struct Not {
+    template <typename T>
+    auto operator()(const T & b ) const -> decltype(!b) {
+        return !b;
+    }
+};
+
+struct Or {
+    template <typename T>
+    auto operator()(const T & left, const T & right) const ->
+    decltype(left || right) {
+        return left || right;
+    }
+};
+
+struct And {
+    template <typename T>
+    auto operator()(const T & left, const T & right) const -> 
+        decltype(left && right){
+        return left && right;
+    }
+};
+
+
 //Functor stores binary operator "o" and two functors "f" and "g"
 //for given "args" returns o(f(args), g(args))
 template <typename FunctorLeft, typename FunctorRight, typename Operator>
@@ -218,7 +255,11 @@ template <typename FunctorLeft, typename FunctorRight, typename Operator>
             m_operator(std::move(op)) {}
 
         template <typename ... Args> 
-            bool  operator()(Args&&... args) const {
+            auto  operator()(Args&&... args) const ->
+                decltype(std::declval<Operator>()(
+                            std::declval<FunctorLeft>()(std::forward<Args>(args)...),
+                            std::declval<FunctorRight>()(std::forward<Args>(args)...)
+                            )){
                 return m_operator(m_left(std::forward<Args>(args)...), 
                                   m_right(std::forward<Args>(args)...));
             }
@@ -240,8 +281,8 @@ template <typename FunctorLeft, typename FunctorRight, typename Operator>
 
 
 //******************** this is set of functors 
-//allowing two compose functors which returns bool using
-//standard bool operators
+//allowing two compose functors  using
+//standard logical operators
 
 
 //Not
@@ -251,7 +292,8 @@ template <typename Functor>
             m_functor(functor) {}
 
         template <typename ... Args> 
-            bool  operator()(Args&&... args) const {
+            auto operator()(Args&&... args) const ->
+                decltype(std::declval<Functor>()(std::forward<Args>(args)...)) {
                 return !m_functor(std::forward<Args>(args)...);
             }
 
@@ -270,8 +312,8 @@ template <typename Functor>
 //Or
 template <typename FunctorLeft, typename FunctorRight>
     class OrFunctor : 
-            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_or<bool>> {
-        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_or<bool>> base;
+            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, Or> {
+        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, Or> base;
 
     public:
         OrFunctor(FunctorLeft left = FunctorLeft(), 
@@ -288,8 +330,8 @@ template <typename FunctorLeft, typename FunctorRight>
 //And
 template <typename FunctorLeft, typename FunctorRight>
     class AndFunctor :
-            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_and<bool>> {
-        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_and<bool>> base;
+            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, And> {
+        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, And> base;
 
     public:
 
@@ -306,8 +348,8 @@ template <typename FunctorLeft, typename FunctorRight>
 
 template <typename FunctorLeft, typename FunctorRight>
     class XorFunctor :
-            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::not_equal_to<bool>> {
-        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::not_equal_to<bool>> base;
+            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, NotEqualTo> {
+        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, NotEqualTo> base;
 
     public:
         XorFunctor(FunctorLeft left = FunctorLeft(), FunctorRight right = FunctorRight()) :
