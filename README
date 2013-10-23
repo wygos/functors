@@ -53,12 +53,6 @@ FunctorToOutputIterator<Functor>
     The output iterator stores a functor and
     each time the operator= is called the given functor is called
 
-Logical operators as functors:
-    * Not 
-    * Or 
-    * And 
-    * Xor 
-
 LiftBinaryOperatorFunctor<Operator, FunctorLeft, FunctorRight>
     Functor stores a binary operator "o" and two functors "f" and "g".
     For given arguments args returns o(f(args), g(args)).

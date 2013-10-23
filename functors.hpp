@@ -13,6 +13,7 @@
 #define BOOST_FUNCTORS_HPP 
 #include <cassert>
 #include <utility>
+#include <functional>
 
 namespace boost {
 
@@ -206,33 +207,6 @@ template <typename Functor>
         return FunctorToOutputIterator<Functor>(std::move(functor));
     }
 
-
-//****************************** This is set of functors representing standard boolean operation
-//that is !, &&, ||, !=(xor).
-struct Not {
-    bool operator()(bool b) const {
-        return !b;
-    }
-};
-
-struct Or {
-    bool operator()(bool left, bool right) const {
-        return left || right;
-    }
-};
-
-struct And {
-    bool operator()(bool left, bool right) const {
-        return left && right;
-    }
-};
-
-struct Xor {
-    bool operator()(bool left, bool right) const {
-        return left != right;
-    }
-};
-
 //Functor stores binary operator "o" and two functors "f" and "g"
 //for given "args" returns o(f(args), g(args))
 template <typename FunctorLeft, typename FunctorRight, typename Operator>
@@ -296,8 +270,8 @@ template <typename Functor>
 //Or
 template <typename FunctorLeft, typename FunctorRight>
     class OrFunctor : 
-            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, Or> {
-        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, Or> base;
+            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_or<bool>> {
+        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_or<bool>> base;
 
     public:
         OrFunctor(FunctorLeft left = FunctorLeft(), 
@@ -314,8 +288,8 @@ template <typename FunctorLeft, typename FunctorRight>
 //And
 template <typename FunctorLeft, typename FunctorRight>
     class AndFunctor :
-            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, And> {
-        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, And> base;
+            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_and<bool>> {
+        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::logical_and<bool>> base;
 
     public:
 
@@ -332,8 +306,8 @@ template <typename FunctorLeft, typename FunctorRight>
 
 template <typename FunctorLeft, typename FunctorRight>
     class XorFunctor :
-            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, Xor> {
-        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, Xor> base;
+            public LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::not_equal_to<bool>> {
+        typedef LiftBinaryOperatorFunctor<FunctorLeft, FunctorRight, std::not_equal_to<bool>> base;
 
     public:
         XorFunctor(FunctorLeft left = FunctorLeft(), FunctorRight right = FunctorRight()) :

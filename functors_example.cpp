@@ -125,31 +125,6 @@ void output_iterator_functor() {
     assert(nr == 10);
 }
 
-void boolean_functors() {
-    Not notFun;
-    Or orFun;
-    And andFun;
-    Xor xorFun;
-
-    assert(!notFun(true));
-    assert( notFun(false));
-
-    assert(!orFun(false, false));
-    assert( orFun(true , false));
-    assert( orFun(false, true));
-    assert( orFun(true , true));
-    
-    assert(!andFun(false, false));
-    assert(!andFun(true , false));
-    assert(!andFun(false, true));
-    assert( andFun(true , true));
-    
-    assert(!xorFun(false, false));
-    assert( xorFun(true , false));
-    assert( xorFun(false, true));
-    assert(!xorFun(true , true));
-}
-
 void lift_operator_functor() {
     auto oper = [](int a, int b) {return a + b > 0;};
     ReturnZeroFunctor zero;
@@ -193,10 +168,8 @@ void boolean_functors_on_functors() {
 
 int main() {
     functors_example();
-    boolean_functors();
     comparator_functor();
     output_iterator_functor();
-    boolean_functors();
     lift_operator_functor();
     boolean_functors_on_functors();
 
