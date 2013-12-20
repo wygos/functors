@@ -11,19 +11,28 @@
 
 #ifndef BOOST_FUNCTORS_HPP
 #define BOOST_FUNCTORS_HPP 
+
+#define BOOST_RESULT_OF_USE_DECLTYPE
+
 #include <cassert>
 #include <utility>
 
 namespace boost {
 
-//Functor does nothing
+/**
+ * @brief Functor does nothing
+ */
 struct SkipFunctor {
     template <typename ... Args > 
         void  operator()(Args&&... args) const {}
 };
 
-//Functor returns always the same number. 
-//The number has to be known at compile time
+/**
+ * @brief Functor returns always the same number. The number has to be known at compile time
+ *
+ * @tparam T type of returned value
+ * @tparam t return value
+ */
 template <typename T, T t>
     struct ReturnSomethingFunctor {
         template <typename ... Args > 
@@ -32,7 +41,42 @@ template <typename T, T t>
             } 
     };
 
-//functor returns its argument
+/**
+ * @brief Functor returns always the same number (dynamic version). 
+ *
+ * @tparam T type of returned value
+ */
+template <typename T>
+    struct DynamicReturnSomethingFunctor {
+        DynamicReturnSomethingFunctor(T t) : m_t(t) {}
+        template <typename ... Args > 
+            T  operator()(Args&&... args) const {
+                return m_t;
+            }
+    private:
+        T m_t;
+    };
+
+
+
+/**
+ * @brief make function for DynamicReturnSomethingFunctor
+ *
+ * @tparam T
+ * @param t
+ *
+ * @return 
+ */
+template <typename T>
+DynamicReturnSomethingFunctor<T>
+make_DynamicReturnSomethingFunctor(T t) {
+    return DynamicReturnSomethingFunctor<T>(t);
+}
+
+
+/**
+ * @brief functor returns its argument
+ */
 struct IdentityFunctor {
     template <typename Arg> 
         auto  operator()(Arg&& arg) const ->
@@ -42,19 +86,31 @@ struct IdentityFunctor {
         }
 };
 
-//functor return false
+
+/**
+ * @brief functor return false
+ */
 struct ReturnFalseFunctor : 
     public ReturnSomethingFunctor<bool, false> {};
 
-//functor return true
+
+/**
+ * @brief functor return true
+ */
 struct ReturnTrueFunctor : 
     public ReturnSomethingFunctor<bool, true> {};
 
-//functor returns 0
+
+/**
+ * @brief functor returns 0
+ */
 struct ReturnZeroFunctor :
     public ReturnSomethingFunctor<int, 0> {};
 
-//functors calls assert(false). 
+
+/**
+ * @brief functors calls assert(false). 
+ */
 struct AssertFunctor {
     template <typename ... Args > 
         void  operator()(Args&&... args) const {
@@ -62,30 +118,136 @@ struct AssertFunctor {
         } 
 };
 
+/**
+ * @brief removes reference
+ */
+struct RemoveReference {
+    template <typename T>
+    T operator()(const T & t) const {
+        return t;
+    }
+};
 
-// Adapts array as function, providing operator()().     
+
+
+/**
+ * @brief Adapts array as function, providing operator()().     
+ *
+ * @tparam Array
+ */
 template <typename Array> 
     class ArrayToFunctor{
         public:
             ArrayToFunctor(const Array & array, int offset = 0) : 
-                m_array(array), m_offset(offset) {}
+                m_array(&array), m_offset(offset) {}
 
             typedef decltype(std::declval<const Array>()[0]) Value;
-            Value operator()(int a) const {return m_array[a + m_offset];}
+
+            Value operator()(int a) const {
+                return (*m_array)[a + m_offset];
+            }
 
         private:
-            const Array & m_array;
+            const Array * m_array;
             int m_offset;
     };
 
+/**
+ * @brief make function for ArrayToFunctor
+ *
+ * @tparam Array
+ * @param a
+ * @param offset
+ *
+ * @return 
+ */
 template <typename Array>
     ArrayToFunctor<Array> make_ArrayToFunctor(const Array &a, int offset = 0) {
         return ArrayToFunctor<Array>(a, offset);
     }
 
+
+/**
+ * @brief  Wrapper around a functor which adds assigmnent operator as well as default constructor.
+ * Note, this struct might be dangerous. Using this struct correctly requires the underlying
+ * functor to live at least as long as this wrapper.
+ *
+ * @tparam Functor
+ */
+template <typename Functor>
+struct AssignableFunctor {
+   
+   AssignableFunctor() = default;
+   AssignableFunctor(const AssignableFunctor& af)  = default;
+   AssignableFunctor(AssignableFunctor&&) = default;
+   AssignableFunctor(Functor& f) : m_f(&f) {}
+ 
+   AssignableFunctor& operator=(AssignableFunctor&&) = default;
+   AssignableFunctor& operator=(const AssignableFunctor& af) = default;
+   AssignableFunctor& operator=(Functor& f) { m_f = f; }
+
+   template<typename ... Args>
+   auto operator()(Args&& ... args) const ->
+      decltype(std::declval<Functor>()(std::forward<Args>(args)...)) {
+      return (*m_f)(std::forward<Args>(args)...);
+   }
+
+   private:
+      const Functor* m_f;
+};
+
+/**
+ * @brief make function for AssignableFunctor
+ *
+ * @tparam Functor
+ * @param f
+ *
+ * @return 
+ */
+template <typename Functor>
+AssignableFunctor<Functor>
+make_AssignableFunctor(Functor& f) {
+   return AssignableFunctor<Functor>(f);
+}
+
+/**
+ * @brief For given functor f, LiftIteratorFunctor provides operator()(Iterator iterator)
+ * which returns f(*iter).
+ *
+ * @tparam Functor
+ */
+template <typename Functor>
+struct LiftIteratorFunctor {
+   LiftIteratorFunctor(Functor f) : m_f(std::move(f)) {}
+
+   template <typename Iterator>
+   auto operator()(Iterator iter) const -> decltype(std::declval<Functor>()(*iter)) {
+      return m_f(*iter);
+   }
+   private:
+      Functor m_f;
+};
+
+/**
+ * @brief make function for LiftIteratorFunctor
+ *
+ * @tparam Functor
+ * @param f
+ *
+ * @return 
+ */
+template <typename Functor>
+LiftIteratorFunctor<Functor>
+make_LiftIteratorFunctor(Functor f) {
+   return LiftIteratorFunctor<Functor>(f);
+}
+
 //************ The set of comparison functors *******************
 //functors are equivalent to corresponding std functors (e.g. std::less) but are not templated
 
+/**
+ * @brief Greater functor
+ */
 struct Greater {
     template<class T>
         auto operator() (const T& x, const T& y) const ->
@@ -94,6 +256,9 @@ struct Greater {
         };
 };
 
+/**
+ * @brief Less functor
+ */
 struct Less {
     template<class T>
         auto operator() (const T& x, const T& y) const ->
@@ -102,6 +267,9 @@ struct Less {
         };
 };
 
+/**
+ * @brief GreaterEqual functor
+ */
 struct GreaterEqual {
     template<class T>
         auto operator() (const T& x, const T& y) const ->
@@ -110,6 +278,9 @@ struct GreaterEqual {
         };
 };
 
+/**
+ * @brief LessEqual functor
+ */
 struct LessEqual {
     template<class T>
         auto operator() (const T& x, const T& y) const ->
@@ -118,6 +289,9 @@ struct LessEqual {
         };
 };
 
+/**
+ * @brief EqualTo functor
+ */
 struct EqualTo {
     template<class T>
         auto operator() (const T& x, const T& y) const ->
@@ -126,6 +300,9 @@ struct EqualTo {
         };
 };
 
+/**
+ * @brief NotEqualTo functor
+ */
 struct NotEqualTo {
     template<class T>
         auto operator() (const T& x, const T& y) const -> 
@@ -162,6 +339,29 @@ template <typename Functor,typename Compare = Less>
     make_FunctorToComparator(Functor functor,Compare compare=Compare()) {
         return FunctorToComparator<Functor,Compare>(std::move(functor), std::move(compare));
     };
+
+//Functor that scales another functor
+template <typename Functor, typename ScaleType, typename ReturnType = ScaleType>
+struct ScaleFunctor {
+
+    ScaleFunctor(Functor f, ScaleType s) : 
+        m_f(std::move(f)), m_s(s) {}
+
+    template <typename Arg>
+    ReturnType operator()(Arg && arg) const {
+        return m_s * m_f(std::forward<Arg>(arg));
+    }
+
+private: 
+    Functor m_f;
+    ScaleType m_s;
+};
+
+template <typename ScaleType, typename ReturnType = ScaleType, typename Functor>
+ScaleFunctor<Functor, ScaleType, ReturnType>
+make_ScaleFunctor(Functor f, ScaleType s) {
+    return ScaleFunctor<Functor, ScaleType, ReturnType>(f, s);
+}
 
 //****************************** This is set of functors representing standard boolean operation
 //that is !, &&, ||. These are equivalent to standard std:: structs but are not templated 
@@ -309,5 +509,5 @@ template <typename FunctorLeft, typename FunctorRight>
         return XorFunctor<FunctorLeft, FunctorRight>(std::move(left), std::move(right));
     }
 
-} //boost
+} //!boost
 #endif /* BOOST_FUNCTORS_HPP */
